@@ -12,9 +12,9 @@ class CurrencyUpdateService
 {
     private ProviderInterface $provider;
 
-    public function __construct(?ProviderInterface $provider = null)
+    public function __construct(ProviderInterface $provider)
     {
-        $this->provider = $provider ?? new CbrProvider();
+        $this->provider = $provider;
     }
 
     /**

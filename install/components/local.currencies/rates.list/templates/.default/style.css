@@ -1,0 +1,20 @@
+.local-currencies-rates {
+    margin: 20px 0;
+}
+
+.local-currencies-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.local-currencies-table th,
+.local-currencies-table td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.local-currencies-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}

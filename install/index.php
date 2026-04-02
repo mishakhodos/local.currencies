@@ -35,7 +35,8 @@ class local_currencies extends CModule
 			Main\ModuleManager::registerModule($this->MODULE_ID);
             $this->InstallDB();
             $this->InstallAgent();
-		}
+            $this->InstallComponents();
+        }
 		catch (Exception $e)
 		{
 			global $APPLICATION;
@@ -53,7 +54,8 @@ class local_currencies extends CModule
 		{
             $this->UnInstallDB();
             $this->UnInstallAgent();
-			Main\ModuleManager::unRegisterModule($this->MODULE_ID);
+            $this->UnInstallComponents();
+            Main\ModuleManager::unRegisterModule($this->MODULE_ID);
 		}
 		catch (Exception $e)
 		{
@@ -109,6 +111,32 @@ class local_currencies extends CModule
     public function UnInstallAgent()
     {
         \CAgent::RemoveModuleAgents('local.currencies');
+        return true;
+    }
+
+    // внутри класса local_currencies
+
+    public function InstallComponents()
+    {
+        $sourcePath = __DIR__ . '/components/local.currencies';
+        $targetPath = $_SERVER['DOCUMENT_ROOT'] . '/local/components/local.currencies';
+
+        if (!is_dir($sourcePath)) {
+            return false;
+        }
+
+        // Копируем папку рекурсивно
+        \CopyDirFiles($sourcePath, $targetPath, true, true);
+
+        return true;
+    }
+
+    public function UnInstallComponents()
+    {
+        $targetPath = $_SERVER['DOCUMENT_ROOT'] . '/local/components/local.currencies';
+        if (is_dir($targetPath)) {
+            \DeleteDirFilesEx('/local/components/local.currencies');
+        }
         return true;
     }
 }

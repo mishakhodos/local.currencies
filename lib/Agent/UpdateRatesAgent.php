@@ -2,12 +2,8 @@
 
 namespace Local\Currencies\Agent;
 
+use Bitrix\Main\DI\ServiceLocator;
 use Bitrix\Main\Loader;
-use Bitrix\Main\SystemException;
-use Bitrix\Main\Type\DateTime;
-use Local\Currencies\Api\CbrProvider;
-use Local\Currencies\Entity\CurrencyRateTable;
-use Local\Currencies\Service\CurrencyUpdateService;
 
 class UpdateRatesAgent
 {
@@ -23,7 +19,7 @@ class UpdateRatesAgent
         }
 
         try {
-            $service = new CurrencyUpdateService();
+            $service = ServiceLocator::getInstance()->get('local.currencies.update.service');
             $savedCount = $service->updateTodayRates();
 
             // Логируем результат
