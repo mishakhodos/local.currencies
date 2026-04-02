@@ -34,6 +34,7 @@ class local_currencies extends CModule
 		{
 			Main\ModuleManager::registerModule($this->MODULE_ID);
             $this->InstallDB();
+            $this->InstallAgent();
 		}
 		catch (Exception $e)
 		{
@@ -51,6 +52,7 @@ class local_currencies extends CModule
 		try
 		{
             $this->UnInstallDB();
+            $this->UnInstallAgent();
 			Main\ModuleManager::unRegisterModule($this->MODULE_ID);
 		}
 		catch (Exception $e)
@@ -86,6 +88,27 @@ class local_currencies extends CModule
             $connection->dropTable(CurrencyRateTable::getTableName());
         }
 
+        return true;
+    }
+
+    public function InstallAgent()
+    {
+        \CAgent::AddAgent(
+            'Local\Currencies\Agent\UpdateRatesAgent::run();',
+            'local.currencies',
+            'N',
+            86400,
+            '',
+            'Y',
+            '',
+            100
+        );
+        return true;
+    }
+
+    public function UnInstallAgent()
+    {
+        \CAgent::RemoveModuleAgents('local.currencies');
         return true;
     }
 }

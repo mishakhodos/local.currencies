@@ -3,8 +3,8 @@
 namespace Local\Currencies\Api;
 
 use Bitrix\Main\Web\HttpClient;
-use Bitrix\Main\ArgumentException;
 use Bitrix\Main\SystemException;
+use Bitrix\Main\Type\DateTime;
 
 /**
  * Провайдер для получения курсов валют с сайта Центрального Банка РФ
@@ -15,7 +15,7 @@ class CbrProvider implements ProviderInterface
 {
     private const API_URL = 'https://cbr.ru/scripts/XML_daily.asp';
 
-    public function fetchRates(\DateTimeInterface $date): array
+    public function fetchRates(DateTime $date): array
     {
         $httpClient = new HttpClient([
             'socketTimeout' => 10,
