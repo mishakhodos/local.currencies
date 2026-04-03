@@ -180,31 +180,20 @@ class local_currencies extends CModule
                 $rates = $provider->fetchRates($currentDate);
 
                 foreach ($rates as $rate) {
-                    // Проверяем, есть ли уже курс на эту дату
-                    $exists = \Local\Currencies\Entity\CurrencyRateTable::getList([
-                        'filter' => [
-                            '=CURRENCY_CODE' => $rate['CODE'],
-                            '=RATE_DATE' => $currentDate,
-                        ],
-                        'limit' => 1,
-                    ])->fetch();
-
-                    if (!$exists) {
-                        \Local\Currencies\Entity\CurrencyRateTable::add([
-                            'CURRENCY_NAME' => $rate['NAME'],
-                            'CURRENCY_CODE' => $rate['CODE'],
-                            'RATE' => $rate['RATE'],
-                            'RATE_DATE' => $currentDate,
-                        ]);
-                        $savedCount++;
-                    }
+                    \Local\Currencies\Entity\CurrencyRateTable::add([
+                        'CURRENCY_NAME' => $rate['NAME'],
+                        'CURRENCY_CODE' => $rate['CODE'],
+                        'RATE' => $rate['RATE'],
+                        'RATE_DATE' => $currentDate,
+                    ]);
+                    $savedCount++;
                 }
             } catch (\Exception $e) {
                 \CEventLog::Add([
                     'SEVERITY' => 'WARNING',
                     'AUDIT_TYPE_ID' => 'LOCAL_CURRENCIES_INSTALL',
                     'MODULE_ID' => $this->MODULE_ID,
-                    'DESCRIPTION' => "Не удалось получить курсы за {$currentDate->format('Y-m-d')}: {$e->getMessage()}",
+                    'DESCRIPTION' => Loc::getMessage('LOCAL_CURRENCIES_INSTALL_RATES_ERROR', ['#DATE#' => $currentDate->format('Y-m-d'), '#ERROR_MESSAGE#' => $e->getMessage()]),
                 ]);
             }
 
@@ -216,7 +205,7 @@ class local_currencies extends CModule
                 'SEVERITY' => 'INFO',
                 'AUDIT_TYPE_ID' => 'LOCAL_CURRENCIES_INSTALL',
                 'MODULE_ID' => $this->MODULE_ID,
-                'DESCRIPTION' => "При установке добавлено {$savedCount} курсов валют за последние 5 дней",
+                'DESCRIPTION' => Loc::getMessage('LOCAL_CURRENCIES_INSTALL_RATES_TEXT', ['#RATE_COUNT#' => $savedCount,'#DAYS_COUNT#' => 2]),
             ]);
         }
     }

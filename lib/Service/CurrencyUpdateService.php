@@ -5,7 +5,6 @@ namespace Local\Currencies\Service;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\SystemException;
 use Local\Currencies\Api\ProviderInterface;
-use Local\Currencies\Api\CbrProvider;
 use Local\Currencies\Entity\CurrencyRateTable;
 use Bitrix\Main\Type\DateTime;
 
@@ -72,17 +71,6 @@ class CurrencyUpdateService implements CurrencyUpdateServiceInterface
         return $savedCount;
     }
 
-    /**
-     * Получает список валют из настроек модуля
-     *
-     * @return array
-     */
-    private function getSelectedCurrencies(): array
-    {
-        $currenciesStr = Option::get($this->moduleId, 'currencies_list', 'USD,EUR,GBP');
-        $currencies = array_map('trim', explode(',', $currenciesStr));
-        return array_filter($currencies);
-    }
 
     /**
      * Удаляет курсы старше заданного количества дней
@@ -91,7 +79,7 @@ class CurrencyUpdateService implements CurrencyUpdateServiceInterface
      */
     public function cleanOldRates(): int
     {
-        $retentionDays = (int)\Bitrix\Main\Config\Option::get('local.currencies', 'retention_days', 30);
+        $retentionDays = (int) Option::get('local.currencies', 'retention_days', 30);
         $expireDate = new \Bitrix\Main\Type\DateTime();
         $expireDate->add("-{$retentionDays} days");
 
