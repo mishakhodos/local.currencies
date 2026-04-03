@@ -1,34 +1,28 @@
 <?php
-
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\HttpApplication;
 use Bitrix\Main\Loader;
 
 Loc::loadMessages(__FILE__);
 
-global $USER;
 $module_id = "local.currencies";
 
-// Права доступа
 if (!$USER->IsAdmin()) {
     return;
 }
 
 Loader::includeModule($module_id);
 
-// Сохранение настроек
 if ($_SERVER["REQUEST_METHOD"] == "POST" && check_bitrix_sessid()) {
-    COption::SetOptionString($module_id, "currencies_list", $_POST["currencies_list"]);
-    COption::SetOptionString($module_id, "update_time", $_POST["update_time"]);
+    $days = (int)$_POST["retention_days"];
+    if ($days < 1) $days = 30;
+    COption::SetOptionString($module_id, "retention_days", $days);
 }
 
-// Получение текущих настроек
-$currenciesList = COption::GetOptionString($module_id, "currencies_list", "USD,EUR,GBP");
-$updateTime = COption::GetOptionString($module_id, "update_time", "03:00");
+$retentionDays = (int)COption::GetOptionString($module_id, "retention_days", 30);
 
-// Форма для ввода
 $tabControl = new CAdminTabControl("tabControl", [
-    ["DIV" => "edit1", "TAB" => "Настройки", "TITLE" => "Основные параметры"]
+        ["DIV" => "edit1", "TAB" => "Настройки", "TITLE" => "Основные параметры"]
 ]);
 
 ?>
@@ -40,18 +34,10 @@ $tabControl = new CAdminTabControl("tabControl", [
     ?>
     <tr>
         <td width="40%">
-            <label>Валюты для отслеживания (через запятую):</label>
+            <label>Срок хранения курсов (дней):</label>
         </td>
         <td width="60%">
-            <input type="text" name="currencies_list" value="<?= htmlspecialcharsbx($currenciesList) ?>" size="50">
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <label>Время обновления (ЧЧ:ММ):</label>
-        </td>
-        <td>
-            <input type="text" name="update_time" value="<?= htmlspecialcharsbx($updateTime) ?>" size="10">
+            <input type="number" name="retention_days" value="<?= $retentionDays ?>" min="1" max="365">
         </td>
     </tr>
     <?

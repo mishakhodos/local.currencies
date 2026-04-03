@@ -37,6 +37,7 @@ class local_currencies extends CModule
             $this->InstallAgent();
             $this->InstallComponents();
             $this->InstallFiles();
+            $this->InstallTestData();
         }
 		catch (Exception $e)
 		{
@@ -160,5 +161,63 @@ class local_currencies extends CModule
             $_SERVER["DOCUMENT_ROOT"] . "/bitrix/admin"
         );
         return true;
+    }
+
+    public function InstallTestData()
+    {
+        Main\Loader::includeModule($this->MODULE_ID);
+
+        $provider = new \Local\Currencies\Api\CbrProvider();
+        $date = new \Bitrix\Main\Type\DateTime();
+        $dateFrom = clone $date;
+        $dateFrom->add("-2 days");
+
+        $currentDate = clone $dateFrom;
+        $savedCount = 0;
+
+        while ($currentDate <= $date) {
+            try {
+                $rates = $provider->fetchRates($currentDate);
+
+                foreach ($rates as $rate) {
+                    // Проверяем, есть ли уже курс на эту дату
+                    $exists = \Local\Currencies\Entity\CurrencyRateTable::getList([
+                        'filter' => [
+                            '=CURRENCY_CODE' => $rate['CODE'],
+                            '=RATE_DATE' => $currentDate,
+                        ],
+                        'limit' => 1,
+                    ])->fetch();
+
+                    if (!$exists) {
+                        \Local\Currencies\Entity\CurrencyRateTable::add([
+                            'CURRENCY_NAME' => $rate['NAME'],
+                            'CURRENCY_CODE' => $rate['CODE'],
+                            'RATE' => $rate['RATE'],
+                            'RATE_DATE' => $currentDate,
+                        ]);
+                        $savedCount++;
+                    }
+                }
+            } catch (\Exception $e) {
+                \CEventLog::Add([
+                    'SEVERITY' => 'WARNING',
+                    'AUDIT_TYPE_ID' => 'LOCAL_CURRENCIES_INSTALL',
+                    'MODULE_ID' => $this->MODULE_ID,
+                    'DESCRIPTION' => "Не удалось получить курсы за {$currentDate->format('Y-m-d')}: {$e->getMessage()}",
+                ]);
+            }
+
+            $currentDate->add("+1 day");
+        }
+
+        if ($savedCount > 0) {
+            \CEventLog::Add([
+                'SEVERITY' => 'INFO',
+                'AUDIT_TYPE_ID' => 'LOCAL_CURRENCIES_INSTALL',
+                'MODULE_ID' => $this->MODULE_ID,
+                'DESCRIPTION' => "При установке добавлено {$savedCount} курсов валют за последние 5 дней",
+            ]);
+        }
     }
 }

@@ -21,13 +21,13 @@ class UpdateRatesAgent
         try {
             $service = ServiceLocator::getInstance()->get('local.currencies.update.service');
             $savedCount = $service->updateTodayRates();
-
+            $deletedCount = $service->cleanOldRates();
             // Логируем результат
             \CEventLog::Add([
                 'SEVERITY' => 'INFO',
                 'AUDIT_TYPE_ID' => 'LOCAL_CURRENCIES_AGENT',
                 'MODULE_ID' => 'local.currencies',
-                'DESCRIPTION' => "Обновление курсов: сохранено {$savedCount} записей",
+                'DESCRIPTION' => "Обновление: +{$savedCount} записей, удалено старых: {$deletedCount}",
             ]);
         } catch (\Exception $e) {
             \CEventLog::Add([
