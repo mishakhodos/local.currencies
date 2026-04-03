@@ -36,6 +36,7 @@ class local_currencies extends CModule
             $this->InstallDB();
             $this->InstallAgent();
             $this->InstallComponents();
+            $this->InstallFiles();
         }
 		catch (Exception $e)
 		{
@@ -55,6 +56,7 @@ class local_currencies extends CModule
             $this->UnInstallDB();
             $this->UnInstallAgent();
             $this->UnInstallComponents();
+            $this->UnInstallFiles();
             Main\ModuleManager::unRegisterModule($this->MODULE_ID);
 		}
 		catch (Exception $e)
@@ -137,6 +139,26 @@ class local_currencies extends CModule
         if (is_dir($targetPath)) {
             \DeleteDirFilesEx('/local/components/local.currencies');
         }
+        return true;
+    }
+
+    public function InstallFiles()
+    {
+        CopyDirFiles(
+            __DIR__ . "/admin",
+            $_SERVER["DOCUMENT_ROOT"] . "/bitrix/admin",
+            true,
+            true
+        );
+        return true;
+    }
+
+    public function UnInstallFiles()
+    {
+        DeleteDirFiles(
+            __DIR__ . "/admin",
+            $_SERVER["DOCUMENT_ROOT"] . "/bitrix/admin"
+        );
         return true;
     }
 }

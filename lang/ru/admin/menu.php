@@ -1,0 +1,3 @@
+<?php
+$MESS["LOCAL_CURRENCIES_MENU_ITEM_TITLE"] = "Курсы валют";
+$MESS["LOCAL_CURRENCIES_MENU_ITEM_TEXT"] = "Курсы валют";
